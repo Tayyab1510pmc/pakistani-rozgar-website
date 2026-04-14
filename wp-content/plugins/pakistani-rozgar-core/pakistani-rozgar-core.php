@@ -186,8 +186,8 @@ function pr_create_demo_jobs() {
             update_post_meta( $post_id, '_filled',          0 );
             update_post_meta( $post_id, '_featured',        0 );
 
-            // Set expiry 90 days from now.
-            update_post_meta( $post_id, '_job_expires', date( 'Y-m-d', strtotime( '+90 days' ) ) );
+            // Set expiry 90 days from now (use gmdate to avoid server-timezone ambiguity).
+            update_post_meta( $post_id, '_job_expires', gmdate( 'Y-m-d', strtotime( '+90 days' ) ) );
         }
     }
 }
@@ -233,6 +233,7 @@ function pr_create_pages() {
   <li>📍 <strong>Address:</strong> Lahore, Punjab, Pakistan</li>
 </ul>
 <p>You can also use the contact form below to send us a message directly.</p>
+<!-- Note: replace the shortcode below with your own Contact Form 7 form ID after you create it. -->
 [contact-form-7 id="contact-form" title="Contact form"]',
         ),
     );
@@ -896,7 +897,7 @@ function pr_homepage_layout_shortcode( $atts ) {
     <!-- SEARCH BOX -->
     <div class="pr-search-wrap">
         <h3>&#128269; Search Jobs in Pakistan</h3>
-        <?php echo do_shortcode('[jobs show_filters="true" show_pagination="false" per_page="0"]'); ?>
+        <?php echo wp_kses_post( do_shortcode('[jobs show_filters="true" show_pagination="false" per_page="0"]') ); ?>
     </div>
 
     <!-- CATEGORIES -->
@@ -943,7 +944,7 @@ function pr_homepage_layout_shortcode( $atts ) {
                 <p>Fresh jobs added today – apply before they are gone.</p>
             </div>
 
-            <?php echo do_shortcode('[jobs per_page="6" show_filters="false"]'); ?>
+            <?php echo wp_kses_post( do_shortcode('[jobs per_page="6" show_filters="false"]') ); ?>
 
             <div style="text-align:center;">
                 <a href="<?php echo esc_url( home_url( '/jobs/' ) ); ?>" class="pr-btn">
