@@ -1,0 +1,91 @@
+version: "3.8"
+
+# ============================================================
+#  PakistaniRozgar.com – Local Development Stack
+#  Usage: docker compose up -d
+#  Then open: http://localhost:8080
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # MariaDB – Database
+  # ----------------------------------------------------------
+  db:
+    image: mariadb:10.11
+    container_name: pr_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pakistanirozgar
+      MYSQL_USER: wp_user
+      MYSQL_PASSWORD: wp_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - pr_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ----------------------------------------------------------
+  # WordPress – Application
+  # ----------------------------------------------------------
+  wordpress:
+    image: wordpress:6.5-php8.2-apache
+    container_name: pr_wordpress
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: pakistanirozgar
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: wp_password
+      WORDPRESS_TABLE_PREFIX: pr_
+      WORDPRESS_DEBUG: "true"
+    volumes:
+      # Mount your custom plugin directly into the container
+      - ./wp-content/plugins/pakistani-rozgar-core:/var/www/html/wp-content/plugins/pakistani-rozgar-core
+      # Persist the full WordPress installation (themes, media, other plugins)
+      - wp_data:/var/www/html
+    networks:
+      - pr_network
+
+  # ----------------------------------------------------------
+  # phpMyAdmin – Optional DB GUI (http://localhost:8081)
+  # ----------------------------------------------------------
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: pr_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: rootpassword
+    networks:
+      - pr_network
+
+# ============================================================
+# Named volumes (data persists between container restarts)
+# ============================================================
+volumes:
+  db_data:
+  wp_data:
+
+# ============================================================
+# Internal network
+# ============================================================
+networks:
+  pr_network:
+    driver: bridge
