@@ -245,7 +245,7 @@ function pr_homepage_shortcode() {
     <section class="pr-home-hero">
         <h1>Find Your Dream Job</h1>
         <p>Search verified opportunities in Government, IT, Banking, and remote roles across Pakistan.</p>
-        <?php // Keep per_page="0" so only the premium search UI appears in hero without listing results. ?>
+        <?php // Keep per_page="0" so only the search UI appears in hero without listing results. ?>
         <?php echo do_shortcode('[jobs show_filters="true" show_pagination="false" per_page="0"]'); ?>
         <div class="pr-container">
             <?php echo do_shortcode('[pr_categories]'); ?>
@@ -270,7 +270,7 @@ add_shortcode('pr_contact_page', 'pr_contact_page_shortcode');
 function pr_contact_page_shortcode() {
     $contact_email = sanitize_email(get_option('admin_email'));
     if (empty($contact_email)) {
-        $contact_email = sanitize_email(apply_filters('pr_contact_email_fallback', 'support@pakistanirozgar.com'));
+        $contact_email = sanitize_email(apply_filters('pr_default_contact_email', 'support@pakistanirozgar.com'));
     }
     return '<div class="pr-container" style="padding:80px 20px;max-width:600px;min-height:50vh;"><h1 style="color:#149253;font-size:3rem;text-align:center;font-weight:900;">Contact Us</h1><div style="background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.05);margin-top:30px;"><p style="margin-bottom:20px;color:#475569;text-align:center;">Email us at <strong>' . esc_html($contact_email) . '</strong> and we will get back to you within 24 hours.</p></div></div>';
 }
