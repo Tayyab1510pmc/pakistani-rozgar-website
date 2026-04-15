@@ -15,8 +15,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! function_exists( 'pr_get_contact_whatsapp_number' ) ) {
     function pr_get_contact_whatsapp_number() {
+        // Replace this sample via the `pr_contact_whatsapp_number` filter in your site/plugin.
         $number = apply_filters( 'pr_contact_whatsapp_number', '923001234567' );
         return preg_replace( '/[^0-9]/', '', (string) $number );
+    }
+}
+
+if ( ! function_exists( 'pr_get_page_by_title' ) ) {
+    function pr_get_page_by_title( $title ) {
+        $pages = get_posts(
+            array(
+                'post_type'      => 'page',
+                'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
+                'title'          => $title,
+                'posts_per_page' => 1,
+            )
+        );
+
+        return ! empty( $pages ) ? $pages[0] : null;
     }
 }
 
@@ -24,7 +40,7 @@ if ( ! function_exists( 'pr_auto_create_website_pages' ) ) {
     add_action( 'admin_init', 'pr_auto_create_website_pages' );
 
     function pr_auto_create_website_pages() {
-        if ( get_option( 'pr_v7_pages_created' ) ) {
+        if ( get_option( 'pr_pages_created' ) || get_option( 'pr_v6_pages_created' ) || get_option( 'pr_v7_pages_created' ) ) {
             return;
         }
 
@@ -36,7 +52,7 @@ if ( ! function_exists( 'pr_auto_create_website_pages' ) ) {
         );
 
         foreach ( $pages as $title => $content ) {
-            $page = get_page_by_title( $title );
+            $page = pr_get_page_by_title( $title );
             if ( ! $page ) {
                 wp_insert_post(
                     array(
@@ -49,13 +65,13 @@ if ( ! function_exists( 'pr_auto_create_website_pages' ) ) {
             }
         }
 
-        $home_page = get_page_by_title( 'Home' );
+        $home_page = pr_get_page_by_title( 'Home' );
         if ( $home_page ) {
             update_option( 'show_on_front', 'page' );
             update_option( 'page_on_front', (int) $home_page->ID );
         }
 
-        update_option( 'pr_v7_pages_created', true );
+        update_option( 'pr_pages_created', true );
     }
 }
 
@@ -238,7 +254,34 @@ if ( ! function_exists( 'pr_homepage_shortcode' ) ) {
         echo '<div class="pr-category-grid">';
         foreach ( $categories as $category ) {
             echo '<a class="pr-category-card" href="' . esc_url( $category['url'] ) . '">';
-            echo '<span class="pr-cat-icon" aria-hidden="true">' . $category['icon'] . '</span>';
+            echo '<span class="pr-cat-icon" aria-hidden="true">' . wp_kses(
+                $category['icon'],
+                array(
+                    'svg'    => array(
+                        'viewBox'      => true,
+                        'width'        => true,
+                        'height'       => true,
+                        'fill'         => true,
+                        'stroke'       => true,
+                        'stroke-width' => true,
+                    ),
+                    'path'   => array(
+                        'd' => true,
+                    ),
+                    'rect'   => array(
+                        'x'      => true,
+                        'y'      => true,
+                        'width'  => true,
+                        'height' => true,
+                        'rx'     => true,
+                    ),
+                    'circle' => array(
+                        'cx' => true,
+                        'cy' => true,
+                        'r'  => true,
+                    ),
+                )
+            ) . '</span>';
             echo '<span class="pr-cat-label">' . esc_html( $category['label'] ) . '</span>';
             echo '</a>';
         }
