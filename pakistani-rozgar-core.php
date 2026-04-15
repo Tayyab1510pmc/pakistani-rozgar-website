@@ -99,9 +99,9 @@ function pr_v5_jobs_search_ui_css() {
 	<?php
 }
 
-function pr_v5_build_whatsapp_button_html() {
+function pr_v5_get_whatsapp_button_data() {
 	if ( ! is_singular( 'job_listing' ) ) {
-		return '';
+		return array();
 	}
 
 	$job_id    = get_the_ID();
@@ -109,13 +109,18 @@ function pr_v5_build_whatsapp_button_html() {
 	$job_url   = get_permalink( $job_id );
 
 	if ( ! $job_id || ! $job_url ) {
-		return '';
+		return array();
 	}
 
 	$message = rawurlencode( sprintf( 'Check out this job: %s %s', $job_title, $job_url ) );
 	$wa_url  = 'https://wa.me/?text=' . $message;
+	$label   = sprintf( 'Share %s on WhatsApp', $job_title );
 
-	return '<a class="pr-whatsapp-btn" href="' . esc_url( $wa_url ) . '" target="_blank" rel="noopener noreferrer" aria-label="Share this job on WhatsApp">Share on WhatsApp 📲</a>';
+	return array(
+		'url'   => $wa_url,
+		'label' => $label,
+		'text'  => 'Share on WhatsApp 📲',
+	);
 }
 
 function pr_v5_render_whatsapp_button() {
@@ -126,13 +131,13 @@ function pr_v5_render_whatsapp_button() {
 		return;
 	}
 
-	$html = pr_v5_build_whatsapp_button_html();
-	if ( '' === $html ) {
+	$data = pr_v5_get_whatsapp_button_data();
+	if ( empty( $data['url'] ) ) {
 		return;
 	}
 
 	$printed_for_jobs[ $job_id ] = true;
-	echo '<div class="pr-whatsapp-wrap">' . wp_kses_post( $html ) . '</div>';
+	echo '<div class="pr-whatsapp-wrap"><a class="pr-whatsapp-btn" href="' . esc_url( $data['url'] ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( $data['label'] ) . '">' . esc_html( $data['text'] ) . '</a></div>';
 }
 
 add_action( 'single_job_listing_start', 'pr_v5_render_whatsapp_button', 20 );
@@ -176,8 +181,8 @@ function pr_v5_whatsapp_fallback_injection() {
 		return;
 	}
 
-	$button_html = pr_v5_build_whatsapp_button_html();
-	if ( '' === $button_html ) {
+	$data = pr_v5_get_whatsapp_button_data();
+	if ( empty( $data['url'] ) ) {
 		return;
 	}
 	$selectors = apply_filters(
@@ -191,7 +196,7 @@ function pr_v5_whatsapp_fallback_injection() {
 	$safe_selectors = array();
 	foreach ( (array) $selectors as $selector ) {
 		$selector = wp_strip_all_tags( (string) $selector );
-		if ( preg_match( '/^[\\w\\s\\.,#:\\[\\]\\-\\>\\+\\*\\(\\)]+$/', $selector ) ) {
+		if ( preg_match( '/^[\\w\\s\\.,#\\-]+$/', $selector ) ) {
 			$safe_selectors[] = $selector;
 		}
 	}
@@ -202,7 +207,9 @@ function pr_v5_whatsapp_fallback_injection() {
 	?>
 	<script>
 	(function() {
-		const buttonHtml = <?php echo wp_json_encode( $button_html ); ?>;
+		const whatsappUrl = <?php echo wp_json_encode( esc_url_raw( $data['url'] ) ); ?>;
+		const ariaLabel = <?php echo wp_json_encode( sanitize_text_field( $data['label'] ) ); ?>;
+		const buttonText = <?php echo wp_json_encode( sanitize_text_field( $data['text'] ) ); ?>;
 		const targetSelector = <?php echo wp_json_encode( $selector_string ); ?>;
 		function injectButton() {
 			if (document.querySelector('.pr-whatsapp-btn') !== null) {
@@ -214,7 +221,14 @@ function pr_v5_whatsapp_fallback_injection() {
 			}
 			const wrapper = document.createElement('div');
 			wrapper.className = 'pr-whatsapp-wrap pr-whatsapp-wrap-fallback';
-			wrapper.innerHTML = buttonHtml;
+			const link = document.createElement('a');
+			link.className = 'pr-whatsapp-btn';
+			link.href = whatsappUrl;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+			link.setAttribute('aria-label', ariaLabel);
+			link.textContent = buttonText;
+			wrapper.appendChild(link);
 			target.appendChild(wrapper);
 		}
 		if (window.jQuery) {
