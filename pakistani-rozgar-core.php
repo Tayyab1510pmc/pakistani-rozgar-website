@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // ==========================================
 add_action( 'admin_init', 'pr_auto_create_website_pages' );
 function pr_auto_create_website_pages() {
-    if ( get_option( 'pr_v6_pages_created' ) ) {
+    if ( get_option( 'pr_pages_created' ) || get_option( 'pr_v6_pages_created' ) ) {
         return;
     }
 
@@ -30,7 +30,7 @@ function pr_auto_create_website_pages() {
     );
 
     foreach ( $pages as $title => $content ) {
-        if ( ! get_page_by_title( $title ) ) {
+        if ( ! pr_get_page_by_title( $title ) ) {
             wp_insert_post(
                 array(
                     'post_title'   => $title,
@@ -42,14 +42,28 @@ function pr_auto_create_website_pages() {
         }
     }
 
-    $home = get_page_by_title( 'Home' );
+    $home = pr_get_page_by_title( 'Home' );
 
     if ( $home ) {
         update_option( 'show_on_front', 'page' );
         update_option( 'page_on_front', $home->ID );
     }
 
+    update_option( 'pr_pages_created', true );
     update_option( 'pr_v6_pages_created', true );
+}
+
+function pr_get_page_by_title( $title ) {
+    $pages = get_posts(
+        array(
+            'post_type'      => 'page',
+            'title'          => $title,
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+        )
+    );
+
+    return ! empty( $pages ) ? $pages[0] : null;
 }
 
 // ==========================================
@@ -145,12 +159,12 @@ function pr_universal_header() {
 
     $done = true;
 
-    echo '<header class="pr-header"><div class="pr-container pr-header-inner"><a href="/" class="pr-logo">Pakistani<span>Rozgar</span></a><nav class="pr-nav"><a href="/">Home</a><a href="/browse-jobs/">Browse Jobs</a><a href="/about-us/">About Us</a><a href="/contact-us/">Contact</a></nav><a href="/browse-jobs/" class="pr-btn">View All Jobs</a></div></header>';
+    echo '<header class="pr-header"><div class="pr-container pr-header-inner"><a href="' . esc_url( home_url( '/' ) ) . '" class="pr-logo">Pakistani<span>Rozgar</span></a><nav class="pr-nav"><a href="' . esc_url( home_url( '/' ) ) . '">Home</a><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '">Browse Jobs</a><a href="' . esc_url( home_url( '/about-us/' ) ) . '">About Us</a><a href="' . esc_url( home_url( '/contact-us/' ) ) . '">Contact</a></nav><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '" class="pr-btn">View All Jobs</a></div></header>';
 }
 
 add_action( 'wp_footer', 'pr_universal_footer', 1 );
 function pr_universal_footer() {
-    echo '<footer class="pr-footer"><div class="pr-container pr-footer-grid"><div><h3>Pakistani<span>Rozgar</span></h3><p>Your trusted portal for verified careers across Pakistan.</p></div><div><h4>Candidates</h4><a href="/browse-jobs/">All Jobs</a></div><div><h4>Platform</h4><a href="/about-us/">About Us</a><a href="/contact-us/">Contact Us</a></div><div><h4>Legal</h4><a href="#">Privacy Policy</a></div></div><div class="pr-container" style="border-top: 1px solid #1e293b; margin-top: 40px; padding-top: 20px; text-align: center;">&copy; ' . date( 'Y' ) . ' Pakistani Rozgar. All rights reserved.</div></footer>';
+    echo '<footer class="pr-footer"><div class="pr-container pr-footer-grid"><div><h3>Pakistani<span>Rozgar</span></h3><p>' . esc_html__( 'Your trusted portal for verified careers across Pakistan.', 'pakistani-rozgar' ) . '</p></div><div><h4>' . esc_html__( 'Candidates', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '">' . esc_html__( 'All Jobs', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Platform', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/about-us/' ) ) . '">' . esc_html__( 'About Us', 'pakistani-rozgar' ) . '</a><a href="' . esc_url( home_url( '/contact-us/' ) ) . '">' . esc_html__( 'Contact Us', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Legal', 'pakistani-rozgar' ) . '</h4><a href="#">' . esc_html__( 'Privacy Policy', 'pakistani-rozgar' ) . '</a></div></div><div class="pr-container" style="border-top: 1px solid #1e293b; margin-top: 40px; padding-top: 20px; text-align: center;">&copy; ' . esc_html( date( 'Y' ) ) . ' ' . esc_html__( 'Pakistani Rozgar. All rights reserved.', 'pakistani-rozgar' ) . '</div></footer>';
 }
 
 // ==========================================
@@ -172,33 +186,36 @@ function pr_inject_whatsapp_btn() {
 }
 
 // Hook 2: Unbreakable JavaScript Injection (If Elementor kills the PHP hooks)
-add_action(
-    'wp_footer',
-    function() {
-        if ( is_singular( 'job_listing' ) ) {
-            global $post;
-            $wa_link = 'https://api.whatsapp.com/send?text=' . urlencode( 'Apply for this job: ' . get_the_title( $post->ID ) . ' ' . get_permalink( $post->ID ) );
-            ?>
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var appArea = document.querySelector('.job_application');
-                    if(!appArea) appArea = document.querySelector('.single_job_listing');
-                    if(appArea) {
-                        var waBtn = document.createElement('a');
-                        waBtn.href = "<?php echo esc_js( $wa_link ); ?>";
-                        waBtn.target = "_blank";
-                        waBtn.innerHTML = "📲 Share to WhatsApp";
-                        waBtn.style.cssText = "display: block; background: #25D366 !important; color: white !important; padding: 18px !important; text-align: center !important; border-radius: 8px !important; font-weight: bold !important; text-decoration: none !important; font-size: 1.2rem !important; box-shadow: 0 4px 10px rgba(37,211,102,0.3) !important; margin-top: 25px; width: 100%;";
-                        appArea.appendChild(waBtn);
-                    }
-                });
-            </script>
-            <?php
-            echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . ' - Pakistani Rozgar" />';
-        }
-    },
-    99
-);
+add_action( 'wp_head', 'pr_job_og_meta' );
+function pr_job_og_meta() {
+    if ( is_singular( 'job_listing' ) ) {
+        echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . ' - Pakistani Rozgar" />';
+    }
+}
+
+add_action( 'wp_footer', 'pr_inject_whatsapp_btn_js_fallback', 99 );
+function pr_inject_whatsapp_btn_js_fallback() {
+    if ( is_singular( 'job_listing' ) ) {
+        global $post;
+        $wa_link = 'https://api.whatsapp.com/send?text=' . urlencode( 'Apply for this job: ' . get_the_title( $post->ID ) . ' ' . get_permalink( $post->ID ) );
+        ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var appArea = document.querySelector('.job_application');
+                if(!appArea) appArea = document.querySelector('.single_job_listing');
+                if(appArea) {
+                    var waBtn = document.createElement('a');
+                    waBtn.href = "<?php echo esc_js( $wa_link ); ?>";
+                    waBtn.target = "_blank";
+                    waBtn.innerHTML = "📲 Share to WhatsApp";
+                    waBtn.style.cssText = "display: block; background: #25D366 !important; color: white !important; padding: 18px !important; text-align: center !important; border-radius: 8px !important; font-weight: bold !important; text-decoration: none !important; font-size: 1.2rem !important; box-shadow: 0 4px 10px rgba(37,211,102,0.3) !important; margin-top: 25px; width: 100%;";
+                    appArea.appendChild(waBtn);
+                }
+            });
+        </script>
+        <?php
+    }
+}
 
 // ==========================================
 // 5. BEAUTIFUL PAGE SHORTCODES
