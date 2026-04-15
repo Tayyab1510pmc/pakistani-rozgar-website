@@ -22,6 +22,8 @@ function pr_auto_create_website_pages() {
         return;
     }
 
+    $home_id = 0;
+
     $pages = array(
         'Home'        => '[pr_homepage]',
         'Browse Jobs' => '[jobs]',
@@ -30,23 +32,31 @@ function pr_auto_create_website_pages() {
     );
 
     foreach ( $pages as $title => $content ) {
-        if ( ! pr_get_page_by_title( $title ) ) {
-            wp_insert_post(
-                array(
-                    'post_title'   => $title,
-                    'post_content' => $content,
-                    'post_status'  => 'publish',
-                    'post_type'    => 'page',
-                )
-            );
+        $existing_page = pr_get_page_by_title( $title );
+        if ( $existing_page ) {
+            if ( 'Home' === $title ) {
+                $home_id = (int) $existing_page->ID;
+            }
+            continue;
+        }
+
+        $page_id = wp_insert_post(
+            array(
+                'post_title'   => $title,
+                'post_content' => $content,
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+            )
+        );
+
+        if ( ! is_wp_error( $page_id ) && 'Home' === $title ) {
+            $home_id = (int) $page_id;
         }
     }
 
-    $home = pr_get_page_by_title( 'Home' );
-
-    if ( $home ) {
+    if ( $home_id ) {
         update_option( 'show_on_front', 'page' );
-        update_option( 'page_on_front', $home->ID );
+        update_option( 'page_on_front', $home_id );
     }
 
     update_option( 'pr_pages_created', true );
@@ -54,16 +64,7 @@ function pr_auto_create_website_pages() {
 }
 
 function pr_get_page_by_title( $title ) {
-    $pages = get_posts(
-        array(
-            'post_type'      => 'page',
-            'title'          => $title,
-            'post_status'    => 'any',
-            'posts_per_page' => 1,
-        )
-    );
-
-    return ! empty( $pages ) ? $pages[0] : null;
+    return get_page_by_path( sanitize_title( $title ), OBJECT, 'page' );
 }
 
 // ==========================================
@@ -185,7 +186,8 @@ function pr_inject_whatsapp_btn() {
         return;
     }
 
-    $wa_link = 'https://api.whatsapp.com/send?text=' . urlencode( 'Apply for this job: ' . get_the_title( $post->ID ) . ' ' . get_permalink( $post->ID ) );
+    $wa_message = sprintf( __( 'Apply for this job: %1$s %2$s', 'pakistani-rozgar' ), get_the_title( $post->ID ), get_permalink( $post->ID ) );
+    $wa_link    = 'https://api.whatsapp.com/send?text=' . rawurlencode( $wa_message );
 
     echo '<div style="margin-top: 25px; width: 100%; clear: both;"><a href="' . esc_url( $wa_link ) . '" target="_blank" style="display: block; background: #25D366 !important; color: white !important; padding: 18px !important; text-align: center !important; border-radius: 8px !important; font-weight: bold !important; text-decoration: none !important; font-size: 1.2rem !important; box-shadow: 0 4px 10px rgba(37,211,102,0.3) !important;">📲 Share to WhatsApp</a></div>';
 }
@@ -202,7 +204,8 @@ add_action( 'wp_footer', 'pr_inject_whatsapp_btn_js_fallback', 99 );
 function pr_inject_whatsapp_btn_js_fallback() {
     if ( is_singular( 'job_listing' ) ) {
         global $post;
-        $wa_link = 'https://api.whatsapp.com/send?text=' . urlencode( 'Apply for this job: ' . get_the_title( $post->ID ) . ' ' . get_permalink( $post->ID ) );
+        $wa_message = sprintf( __( 'Apply for this job: %1$s %2$s', 'pakistani-rozgar' ), get_the_title( $post->ID ), get_permalink( $post->ID ) );
+        $wa_link    = 'https://api.whatsapp.com/send?text=' . rawurlencode( $wa_message );
         ?>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -210,7 +213,7 @@ function pr_inject_whatsapp_btn_js_fallback() {
                 if(!appArea) appArea = document.querySelector('.single_job_listing');
                 if(appArea) {
                     var waBtn = document.createElement('a');
-                    waBtn.href = "<?php echo esc_js( $wa_link ); ?>";
+                    waBtn.href = "<?php echo esc_js( esc_url_raw( $wa_link ) ); ?>";
                     waBtn.target = "_blank";
                     waBtn.innerHTML = "📲 Share to WhatsApp";
                     waBtn.style.cssText = "display: block; background: #25D366 !important; color: white !important; padding: 18px !important; text-align: center !important; border-radius: 8px !important; font-weight: bold !important; text-decoration: none !important; font-size: 1.2rem !important; box-shadow: 0 4px 10px rgba(37,211,102,0.3) !important; margin-top: 25px; width: 100%;";
