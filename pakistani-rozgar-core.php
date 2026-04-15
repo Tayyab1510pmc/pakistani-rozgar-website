@@ -100,8 +100,76 @@ function pr_universal_header() {
     echo '<header class="pr-header"><div class="pr-container pr-header-inner"><a href="/" class="pr-logo">Pakistani<span>Rozgar</span></a><nav class="pr-nav"><a href="/">Home</a><a href="/browse-jobs/">Browse Jobs</a><a href="/contact-us/">Contact</a></nav><a href="/browse-jobs/" class="pr-btn">View All Jobs</a></div></header>'; 
 }
 add_action('wp_footer', 'pr_universal_footer', 1);
+function pr_get_social_links() {
+    $links = apply_filters('pr_social_links', array(
+        'facebook'  => '',
+        'instagram' => '',
+        'linkedin'  => '',
+    ));
+    if (!is_array($links)) {
+        return array('facebook' => '', 'instagram' => '', 'linkedin' => '');
+    }
+    return array(
+        'facebook'  => !empty($links['facebook']) ? esc_url($links['facebook']) : '',
+        'instagram' => !empty($links['instagram']) ? esc_url($links['instagram']) : '',
+        'linkedin'  => !empty($links['linkedin']) ? esc_url($links['linkedin']) : '',
+    );
+}
+
+function pr_get_social_svg($platform) {
+    $svgs = array(
+        'facebook'  => '<svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03h-2.54v-2.9h2.54V9.84c0-2.52 1.49-3.91 3.78-3.91 1.1 0 2.25.2 2.25.2v2.47h-1.27c-1.25 0-1.64.78-1.64 1.58v1.89h2.79l-.45 2.9h-2.34V22c4.78-.75 8.44-4.91 8.44-9.93z"></path></svg>',
+        'instagram' => '<svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4A5.8 5.8 0 0 1 16.2 22H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.9A3.9 3.9 0 0 0 3.9 7.8v8.4a3.9 3.9 0 0 0 3.9 3.9h8.4a3.9 3.9 0 0 0 3.9-3.9V7.8a3.9 3.9 0 0 0-3.9-3.9H7.8zm8.95 1.45a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.9a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"></path></svg>',
+        'linkedin'  => '<svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.95v5.66H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.61 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45z"></path></svg>',
+    );
+    return isset($svgs[$platform]) ? $svgs[$platform] : '';
+}
+
 function pr_universal_footer() {
-    echo '<footer class="pr-footer"><div class="pr-container"><div class="pr-footer-grid"><div><h3>Pakistani <span style="color:#22c55e;">Rozgar</span></h3><p>Your trusted portal for verified jobs across Pakistan.</p><div class="pr-footer-social"><a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03h-2.54v-2.9h2.54V9.84c0-2.52 1.49-3.91 3.78-3.91 1.1 0 2.25.2 2.25.2v2.47h-1.27c-1.25 0-1.64.78-1.64 1.58v1.89h2.79l-.45 2.9h-2.34V22c4.78-.75 8.44-4.91 8.44-9.93z"></path></svg></a><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4A5.8 5.8 0 0 1 16.2 22H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.9A3.9 3.9 0 0 0 3.9 7.8v8.4a3.9 3.9 0 0 0 3.9 3.9h8.4a3.9 3.9 0 0 0 3.9-3.9V7.8a3.9 3.9 0 0 0-3.9-3.9H7.8zm8.95 1.45a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.9a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"></path></svg></a><a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.95v5.66H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.61 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45z"></path></svg></a></div></div><div><h4>Candidates</h4><a href="/browse-jobs/">Browse Jobs</a><a href="/browse-jobs/?search_keywords=Remote">Remote Jobs</a><a href="/browse-jobs/?search_keywords=Government">Government Jobs</a></div><div><h4>Company</h4><a href="/about-us/">About Us</a><a href="/contact-us/">Contact Us</a><a href="/browse-jobs/">Featured Jobs</a></div><div><h4>Resources</h4><a href="/privacy-policy/">Privacy Policy</a><a href="/terms-and-conditions/">Terms & Conditions</a><a href="/contact-us/">Support</a></div></div><div style="border-top:1px solid #1e293b;margin-top:35px;padding-top:20px;text-align:center;">&copy; ' . date('Y') . ' Pakistani Rozgar. All rights reserved.</div></div></footer>';
+    $social_links = pr_get_social_links();
+    ob_start(); ?>
+    <footer class="pr-footer">
+        <div class="pr-container">
+            <div class="pr-footer-grid">
+                <div>
+                    <h3>Pakistani <span style="color:#22c55e;">Rozgar</span></h3>
+                    <p>Your trusted portal for verified jobs across Pakistan.</p>
+                    <div class="pr-footer-social">
+                        <?php foreach ($social_links as $platform => $url) : ?>
+                            <?php if (!empty($url)) : ?>
+                                <a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(ucfirst($platform)); ?>">
+                                    <?php echo pr_get_social_svg($platform); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                </a>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div>
+                    <h4>Candidates</h4>
+                    <a href="/browse-jobs/">Browse Jobs</a>
+                    <a href="/browse-jobs/?search_keywords=Remote">Remote Jobs</a>
+                    <a href="/browse-jobs/?search_keywords=Government">Government Jobs</a>
+                </div>
+                <div>
+                    <h4>Company</h4>
+                    <a href="/about-us/">About Us</a>
+                    <a href="/contact-us/">Contact Us</a>
+                    <a href="/browse-jobs/">Featured Jobs</a>
+                </div>
+                <div>
+                    <h4>Resources</h4>
+                    <a href="/privacy-policy/">Privacy Policy</a>
+                    <a href="/terms-and-conditions/">Terms &amp; Conditions</a>
+                    <a href="/contact-us/">Support</a>
+                </div>
+            </div>
+            <div style="border-top:1px solid #1e293b;margin-top:35px;padding-top:20px;text-align:center;">
+                &copy; <?php echo esc_html(wp_date('Y')); ?> Pakistani Rozgar. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <?php
+    echo ob_get_clean();
 }
 
 // 4. WHATSAPP BUTTON & SEO
@@ -111,7 +179,17 @@ function pr_inject_whatsapp_btn() {
     global $post;
     if(!is_singular('job_listing')) return;
     $wa_link = "https://api.whatsapp.com/send?text=" . urlencode("Apply for this job: " . get_the_title($post->ID) . " " . get_permalink($post->ID));
-    echo '<div style="margin-top:25px;width:100%;clear:both;"><a class="pr-wa-btn" href="' . esc_url($wa_link) . '" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.2c-7.1 0-12.8 5.7-12.8 12.7 0 2.3.6 4.5 1.8 6.5L3.2 29l6.9-1.8a12.9 12.9 0 0 0 5.9 1.5h.1c7 0 12.7-5.7 12.7-12.7S23 3.2 16 3.2zm0 23.3c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.4a10.5 10.5 0 0 1-1.6-5.6c0-5.8 4.8-10.6 10.7-10.6s10.6 4.8 10.6 10.6c0 5.9-4.8 10.6-10.6 10.6zm5.8-7.9c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.8.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-1-1.6-2.1-1.8-2.4-.2-.3 0-.5.1-.7.1-.1.3-.3.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.8 0 1.6 1.2 3.2 1.3 3.4.2.2 2.3 3.6 5.7 5 .8.4 1.5.6 2 .7.9.3 1.7.2 2.3.1.7-.1 1.8-.8 2-1.6.3-.8.3-1.5.2-1.6 0-.1-.2-.2-.5-.4z"></path></svg><span>Share to WhatsApp</span></a></div>';
+    ob_start(); ?>
+    <div style="margin-top:25px;width:100%;clear:both;">
+        <a class="pr-wa-btn" href="<?php echo esc_url($wa_link); ?>" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M16 3.2c-7.1 0-12.8 5.7-12.8 12.7 0 2.3.6 4.5 1.8 6.5L3.2 29l6.9-1.8a12.9 12.9 0 0 0 5.9 1.5h.1c7 0 12.7-5.7 12.7-12.7S23 3.2 16 3.2zm0 23.3c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.4a10.5 10.5 0 0 1-1.6-5.6c0-5.8 4.8-10.6 10.7-10.6s10.6 4.8 10.6 10.6c0 5.9-4.8 10.6-10.6 10.6zm5.8-7.9c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.8.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-1-1.6-2.1-1.8-2.4-.2-.3 0-.5.1-.7.1-.1.3-.3.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.8 0 1.6 1.2 3.2 1.3 3.4.2.2 2.3 3.6 5.7 5 .8.4 1.5.6 2 .7.9.3 1.7.2 2.3.1.7-.1 1.8-.8 2-1.6.3-.8.3-1.5.2-1.6 0-.1-.2-.2-.5-.4z"></path>
+            </svg>
+            <span>Share to WhatsApp</span>
+        </a>
+    </div>
+    <?php
+    echo ob_get_clean();
 }
 
 // 5. HOMEPAGE + CATEGORY/FEATURED SHORTCODES
@@ -185,5 +263,9 @@ function pr_about_page_shortcode() {
 
 add_shortcode('pr_contact_page', 'pr_contact_page_shortcode');
 function pr_contact_page_shortcode() {
-    return '<div class="pr-container" style="padding:80px 20px;max-width:600px;min-height:50vh;"><h1 style="color:#149253;font-size:3rem;text-align:center;font-weight:900;">Contact Us</h1><div style="background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.05);margin-top:30px;"><p style="margin-bottom:20px;color:#475569;text-align:center;">Email us at <strong>support@pakistanirozgar.com</strong> and we will get back to you within 24 hours.</p></div></div>';
+    $contact_email = sanitize_email(get_option('admin_email'));
+    if (empty($contact_email)) {
+        $contact_email = 'support@pakistanirozgar.com';
+    }
+    return '<div class="pr-container" style="padding:80px 20px;max-width:600px;min-height:50vh;"><h1 style="color:#149253;font-size:3rem;text-align:center;font-weight:900;">Contact Us</h1><div style="background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.05);margin-top:30px;"><p style="margin-bottom:20px;color:#475569;text-align:center;">Email us at <strong>' . esc_html($contact_email) . '</strong> and we will get back to you within 24 hours.</p></div></div>';
 }
