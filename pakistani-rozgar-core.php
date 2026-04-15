@@ -13,6 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+if ( ! function_exists( 'pr_get_contact_whatsapp_number' ) ) {
+    function pr_get_contact_whatsapp_number() {
+        $number = apply_filters( 'pr_contact_whatsapp_number', '923001234567' );
+        return preg_replace( '/[^0-9]/', '', (string) $number );
+    }
+}
+
 if ( ! function_exists( 'pr_auto_create_website_pages' ) ) {
     add_action( 'admin_init', 'pr_auto_create_website_pages' );
 
@@ -175,13 +182,15 @@ if ( ! function_exists( 'pr_universal_footer' ) ) {
         $done = true;
 
         $year = gmdate( 'Y' );
+        $contact_whatsapp = pr_get_contact_whatsapp_number();
+
         echo '<footer class="pr-footer">';
         echo '<div class="pr-wrap">';
         echo '<div class="pr-footer-grid">';
         echo '<div><h4>Pakistani Rozgar</h4><p>Pakistan-focused job portal connecting candidates with verified opportunities in government, private, tech, banking, and remote sectors.</p></div>';
         echo '<div><h4>Quick Links</h4><p><a href="' . esc_url( home_url( '/' ) ) . '">Home</a><br><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '">Browse Jobs</a><br><a href="' . esc_url( home_url( '/about-us/' ) ) . '">About Us</a></p></div>';
         echo '<div><h4>Legal</h4><p><a href="' . esc_url( home_url( '/privacy-policy/' ) ) . '">Privacy Policy</a><br><a href="' . esc_url( home_url( '/terms-and-conditions/' ) ) . '">Terms &amp; Conditions</a><br><a href="' . esc_url( home_url( '/contact-us/' ) ) . '">Support</a></p></div>';
-        echo '<div><h4>Contact</h4><p>Email: <a href="mailto:hello@pakistanirozgar.com">hello@pakistanirozgar.com</a><br>WhatsApp: <a href="https://wa.me/923000000000" target="_blank" rel="noopener">+92 300 0000000</a><br>Location: Pakistan</p></div>';
+        echo '<div><h4>Contact</h4><p>Email: <a href="mailto:hello@pakistanirozgar.com">hello@pakistanirozgar.com</a><br>WhatsApp: <a href="https://wa.me/' . esc_attr( $contact_whatsapp ) . '" target="_blank" rel="noopener">+' . esc_html( $contact_whatsapp ) . '</a><br>Location: Pakistan</p></div>';
         echo '</div>';
         echo '<div class="pr-footer-bottom">&copy; ' . esc_html( $year ) . ' Pakistani Rozgar. All rights reserved.</div>';
         echo '</div>';
@@ -200,7 +209,7 @@ if ( ! function_exists( 'pr_homepage_shortcode' ) ) {
                 'url'   => home_url( '/browse-jobs/?search_keywords=Government' ),
             ),
             array(
-                'label' => 'IT &amp; Software',
+                'label' => 'IT & Software',
                 'icon'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/></svg>',
                 'url'   => home_url( '/browse-jobs/?search_keywords=Software' ),
             ),
@@ -230,7 +239,7 @@ if ( ! function_exists( 'pr_homepage_shortcode' ) ) {
         foreach ( $categories as $category ) {
             echo '<a class="pr-category-card" href="' . esc_url( $category['url'] ) . '">';
             echo '<span class="pr-cat-icon" aria-hidden="true">' . $category['icon'] . '</span>';
-            echo '<span class="pr-cat-label">' . esc_html( wp_strip_all_tags( $category['label'] ) ) . '</span>';
+            echo '<span class="pr-cat-label">' . esc_html( $category['label'] ) . '</span>';
             echo '</a>';
         }
         echo '</div>';
@@ -264,18 +273,19 @@ if ( ! function_exists( 'pr_contact_page_shortcode' ) ) {
     add_shortcode( 'pr_contact_page', 'pr_contact_page_shortcode' );
 
     function pr_contact_page_shortcode() {
+        $contact_whatsapp = pr_get_contact_whatsapp_number();
         ob_start();
         echo '<div class="pr-wrap pr-main-shell pr-hide-title"><div class="pr-contact-card">';
         echo '<h1 class="pr-section-title">Contact Us</h1>';
         echo '<p>Need hiring support or have a question? Reach our team anytime.</p>';
         echo '<div class="pr-contact-boxes">';
         echo '<div class="pr-contact-box"><strong>Email Support</strong><br><a href="mailto:hello@pakistanirozgar.com">hello@pakistanirozgar.com</a></div>';
-        echo '<div class="pr-contact-box"><strong>WhatsApp</strong><br><a href="https://wa.me/923000000000" target="_blank" rel="noopener">+92 300 0000000</a></div>';
+        echo '<div class="pr-contact-box"><strong>WhatsApp</strong><br><a href="https://wa.me/' . esc_attr( $contact_whatsapp ) . '" target="_blank" rel="noopener">+' . esc_html( $contact_whatsapp ) . '</a></div>';
         echo '</div>';
         echo '<div class="pr-form-placeholder">';
         echo '<strong>Contact Form Area</strong>';
         echo '<p>If you use WPForms, paste this shortcode on this page or keep this shortcode in the page content:</p>';
-        echo '<code class="pr-form-shortcode">[wpforms id="123" title="false"]</code>';
+        echo '<code class="pr-form-shortcode">[wpforms id="YOUR_FORM_ID" title="false"]</code>';
         echo '<p>Fallback: If no form plugin is installed, users can still contact you by email: <a href="mailto:hello@pakistanirozgar.com">hello@pakistanirozgar.com</a></p>';
         echo '</div>';
         echo '</div></div>';
