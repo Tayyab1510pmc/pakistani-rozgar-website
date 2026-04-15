@@ -66,7 +66,7 @@ It includes:
      - `title`
      - `content`
      - `status` (`publish` or `draft`)
-    - `meta` keys for WP Job Manager fields (location/application/company, based on your setup)
+     - `meta` keys for WP Job Manager fields (location/application/company, based on your setup)
       - Common examples: `_job_location`, `_application`, `_company_name`
       - Verify exact keys from your site by checking an existing job in `wp_postmeta` or your WP Job Manager field configuration.
 4. Add duplicate guard in Make:

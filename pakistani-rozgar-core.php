@@ -112,7 +112,8 @@ function pr_v5_get_whatsapp_button_data() {
 		return array();
 	}
 
-	$message = rawurlencode( sprintf( 'Check out this job: %s %s', $job_title, $job_url ) );
+	$raw_message = apply_filters( 'pr_v5_whatsapp_message', sprintf( 'Check out this job: %s %s', $job_title, $job_url ), $job_id, $job_title, $job_url );
+	$message     = rawurlencode( (string) $raw_message );
 	$wa_url  = 'https://wa.me/?text=' . $message;
 	$label   = sprintf( 'Share %s on WhatsApp', $job_title );
 
@@ -196,12 +197,11 @@ function pr_v5_whatsapp_fallback_injection() {
 	$safe_selectors = array();
 	foreach ( (array) $selectors as $selector ) {
 		$selector = wp_strip_all_tags( (string) $selector );
-		if ( preg_match( '/^[\\w\\s\\.,#\\-]+$/', $selector ) ) {
+		if ( preg_match( '/^[\\w\\s\\.#\\-]+$/', $selector ) ) {
 			$safe_selectors[] = $selector;
 		}
 	}
-	$selector_string = implode( ', ', $safe_selectors );
-	if ( '' === $selector_string ) {
+	if ( empty( $safe_selectors ) ) {
 		return;
 	}
 	?>
@@ -210,12 +210,18 @@ function pr_v5_whatsapp_fallback_injection() {
 		const whatsappUrl = <?php echo wp_json_encode( esc_url_raw( $data['url'] ) ); ?>;
 		const ariaLabel = <?php echo wp_json_encode( sanitize_text_field( $data['label'] ) ); ?>;
 		const buttonText = <?php echo wp_json_encode( sanitize_text_field( $data['text'] ) ); ?>;
-		const targetSelector = <?php echo wp_json_encode( $selector_string ); ?>;
+		const targetSelectors = <?php echo wp_json_encode( array_values( $safe_selectors ) ); ?>;
 		function injectButton() {
 			if (document.querySelector('.pr-whatsapp-btn') !== null) {
 				return;
 			}
-			const target = document.querySelector(targetSelector);
+			let target = null;
+			for (let i = 0; i < targetSelectors.length; i++) {
+				target = document.querySelector(targetSelectors[i]);
+				if (target) {
+					break;
+				}
+			}
 			if (!target) {
 				return;
 			}
