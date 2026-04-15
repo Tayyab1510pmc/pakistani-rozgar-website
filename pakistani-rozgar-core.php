@@ -113,9 +113,10 @@ function pr_v5_get_whatsapp_button_data() {
 	}
 
 	$raw_message = apply_filters( 'pr_v5_whatsapp_message', sprintf( 'Check out this job: %s %s', $job_title, $job_url ), $job_id, $job_title, $job_url );
-	$message     = rawurlencode( (string) $raw_message );
-	$wa_url  = 'https://wa.me/?text=' . $message;
-	$label   = sprintf( 'Share %s on WhatsApp', $job_title );
+	$safe_msg    = trim( wp_strip_all_tags( (string) $raw_message ) );
+	$message     = rawurlencode( $safe_msg );
+	$wa_url      = 'https://wa.me/?text=' . $message;
+	$label       = sprintf( 'Share %s on WhatsApp', $job_title );
 
 	return array(
 		'url'   => $wa_url,
@@ -191,13 +192,13 @@ function pr_v5_whatsapp_fallback_injection() {
 		array(
 			'.application_button',
 			'.job_application',
-			'.single_job_listing .meta',
+			'.single_job_listing',
 		)
 	);
 	$safe_selectors = array();
 	foreach ( (array) $selectors as $selector ) {
 		$selector = wp_strip_all_tags( (string) $selector );
-		if ( preg_match( '/^[\\w\\s\\.#\\-]+$/', $selector ) ) {
+		if ( preg_match( '/^[\\w\\.#\\-]+$/', $selector ) ) {
 			$safe_selectors[] = $selector;
 		}
 	}

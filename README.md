@@ -35,9 +35,10 @@ It includes:
 3. Map extracted fields:
    - Post Title → Job title
    - Post Content → Job description
-   - Custom field/location selector → `_job_location` *(confirm in your WP Job Manager version)*
-   - Apply URL/email selector → `_application` *(confirm in your WP Job Manager version)*
-   - Company/source selector → `_company_name` *(confirm in your WP Job Manager version)*
+   - Custom field/location selector → `_job_location`
+   - Apply URL/email selector → `_application`
+   - Company/source selector → `_company_name`
+   - **Note:** confirm exact keys for your WP Job Manager version.
 4. In campaign settings:
    - Set publishing status (`publish` or `pending` for review).
    - Set a run interval (example: every 30–60 minutes).
