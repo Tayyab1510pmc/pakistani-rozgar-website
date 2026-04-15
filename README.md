@@ -16,6 +16,14 @@ It includes:
 
 > **Important:** Only scrape from sources where you have permission and where terms allow republishing.
 
+### Legal and compliance considerations
+
+- Respect each source website Terms of Service and robots.txt policies.
+- Use polite fetch intervals/rate limits to avoid overloading source servers.
+- Do not copy protected content beyond what your license/permission allows.
+- Remove or anonymize personal data if your process touches applicant data.
+- Follow local legal requirements and platform rules before publishing scraped jobs.
+
 ### Option A — WP Automatic (inside WordPress)
 
 1. Install and activate:
