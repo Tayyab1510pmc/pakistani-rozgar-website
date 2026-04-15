@@ -72,6 +72,7 @@ if ( ! function_exists( 'pr_auto_create_website_pages' ) ) {
         }
 
         update_option( 'pr_pages_created', true );
+        update_option( 'pr_v7_pages_created', true );
     }
 }
 
