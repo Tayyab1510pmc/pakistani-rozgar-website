@@ -115,7 +115,7 @@ function pr_v5_build_whatsapp_button_html() {
 	$message = rawurlencode( sprintf( 'Check out this job: %s %s', $job_title, $job_url ) );
 	$wa_url  = 'https://wa.me/?text=' . $message;
 
-	return '<a class="pr-whatsapp-btn" href="' . esc_url( $wa_url ) . '" target="_blank" rel="noopener noreferrer">📲 Share on WhatsApp</a>';
+	return '<a class="pr-whatsapp-btn" href="' . esc_url( $wa_url ) . '" target="_blank" rel="noopener noreferrer" aria-label="Share this job on WhatsApp">Share on WhatsApp 📲</a>';
 }
 
 function pr_v5_render_whatsapp_button() {
@@ -188,21 +188,31 @@ function pr_v5_whatsapp_fallback_injection() {
 			'.single_job_listing .meta',
 		)
 	);
-	$selector_string = implode( ', ', array_filter( array_map( 'wp_strip_all_tags', (array) $selectors ) ) );
+	$safe_selectors = array();
+	foreach ( (array) $selectors as $selector ) {
+		$selector = wp_strip_all_tags( (string) $selector );
+		if ( preg_match( '/^[\\w\\s\\.,#:\\[\\]\\-\\>\\+\\*\\(\\)]+$/', $selector ) ) {
+			$safe_selectors[] = $selector;
+		}
+	}
+	$selector_string = implode( ', ', $safe_selectors );
+	if ( '' === $selector_string ) {
+		return;
+	}
 	?>
 	<script>
 	(function() {
-		var buttonHtml = <?php echo wp_json_encode( $button_html ); ?>;
-		var targetSelector = <?php echo wp_json_encode( $selector_string ); ?>;
+		const buttonHtml = <?php echo wp_json_encode( $button_html ); ?>;
+		const targetSelector = <?php echo wp_json_encode( $selector_string ); ?>;
 		function injectButton() {
 			if (document.querySelector('.pr-whatsapp-btn') !== null) {
 				return;
 			}
-			var target = document.querySelector(targetSelector);
+			const target = document.querySelector(targetSelector);
 			if (!target) {
 				return;
 			}
-			var wrapper = document.createElement('div');
+			const wrapper = document.createElement('div');
 			wrapper.className = 'pr-whatsapp-wrap pr-whatsapp-wrap-fallback';
 			wrapper.innerHTML = buttonHtml;
 			target.appendChild(wrapper);

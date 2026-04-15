@@ -35,9 +35,9 @@ It includes:
 3. Map extracted fields:
    - Post Title → Job title
    - Post Content → Job description
-   - Custom field/location selector → `_job_location`
-   - Apply URL/email selector → `_application`
-   - Company/source selector → `_company_name`
+   - Custom field/location selector → `_job_location` *(confirm in your WP Job Manager version)*
+   - Apply URL/email selector → `_application` *(confirm in your WP Job Manager version)*
+   - Company/source selector → `_company_name` *(confirm in your WP Job Manager version)*
 4. In campaign settings:
    - Set publishing status (`publish` or `pending` for review).
    - Set a run interval (example: every 30–60 minutes).
@@ -66,7 +66,9 @@ It includes:
      - `title`
      - `content`
      - `status` (`publish` or `draft`)
-     - `meta` keys for WP Job Manager fields (location/application/company, based on your setup)
+    - `meta` keys for WP Job Manager fields (location/application/company, based on your setup)
+      - Common examples: `_job_location`, `_application`, `_company_name`
+      - Verify exact keys from your site by checking an existing job in `wp_postmeta` or your WP Job Manager field configuration.
 4. Add duplicate guard in Make:
    - Store source job URL in a Data Store.
    - Skip create if URL already exists.
