@@ -164,7 +164,12 @@ function pr_universal_header() {
 
 add_action( 'wp_footer', 'pr_universal_footer', 1 );
 function pr_universal_footer() {
-    echo '<footer class="pr-footer"><div class="pr-container pr-footer-grid"><div><h3>Pakistani<span>Rozgar</span></h3><p>' . esc_html__( 'Your trusted portal for verified careers across Pakistan.', 'pakistani-rozgar' ) . '</p></div><div><h4>' . esc_html__( 'Candidates', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '">' . esc_html__( 'All Jobs', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Platform', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/about-us/' ) ) . '">' . esc_html__( 'About Us', 'pakistani-rozgar' ) . '</a><a href="' . esc_url( home_url( '/contact-us/' ) ) . '">' . esc_html__( 'Contact Us', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Legal', 'pakistani-rozgar' ) . '</h4><a href="#">' . esc_html__( 'Privacy Policy', 'pakistani-rozgar' ) . '</a></div></div><div class="pr-container" style="border-top: 1px solid #1e293b; margin-top: 40px; padding-top: 20px; text-align: center;">&copy; ' . esc_html( date( 'Y' ) ) . ' ' . esc_html__( 'Pakistani Rozgar. All rights reserved.', 'pakistani-rozgar' ) . '</div></footer>';
+    $privacy_url = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
+    if ( empty( $privacy_url ) ) {
+        $privacy_url = home_url( '/privacy-policy/' );
+    }
+
+    echo '<footer class="pr-footer"><div class="pr-container pr-footer-grid"><div><h3>Pakistani<span>Rozgar</span></h3><p>' . esc_html__( 'Your trusted portal for verified careers across Pakistan.', 'pakistani-rozgar' ) . '</p></div><div><h4>' . esc_html__( 'Candidates', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/browse-jobs/' ) ) . '">' . esc_html__( 'All Jobs', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Platform', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( home_url( '/about-us/' ) ) . '">' . esc_html__( 'About Us', 'pakistani-rozgar' ) . '</a><a href="' . esc_url( home_url( '/contact-us/' ) ) . '">' . esc_html__( 'Contact Us', 'pakistani-rozgar' ) . '</a></div><div><h4>' . esc_html__( 'Legal', 'pakistani-rozgar' ) . '</h4><a href="' . esc_url( $privacy_url ) . '">' . esc_html__( 'Privacy Policy', 'pakistani-rozgar' ) . '</a></div></div><div class="pr-container" style="border-top: 1px solid #1e293b; margin-top: 40px; padding-top: 20px; text-align: center;">&copy; ' . esc_html( gmdate( 'Y' ) ) . ' ' . esc_html__( 'Pakistani Rozgar. All rights reserved.', 'pakistani-rozgar' ) . '</div></footer>';
 }
 
 // ==========================================
@@ -233,7 +238,7 @@ add_shortcode(
     <div class="pr-container">
         <h2 style="text-align: center; font-size: 2.5rem; color: #1e293b; margin-bottom: 40px; font-weight: 800;">Recent Opportunities</h2>
             <?php echo do_shortcode( '[jobs per_page="6" show_filters="false"]' ); ?>
-        <div style="text-align: center; margin-top: 50px; margin-bottom: 80px;"><a href="/browse-jobs/" class="pr-btn" style="padding: 15px 40px !important; font-size: 1.1rem !important;">Browse All Jobs</a></div>
+        <div style="text-align: center; margin-top: 50px; margin-bottom: 80px;"><a href="<?php echo esc_url( home_url( '/browse-jobs/' ) ); ?>" class="pr-btn" style="padding: 15px 40px !important; font-size: 1.1rem !important;">Browse All Jobs</a></div>
     </div>
         <?php
         return ob_get_clean();
