@@ -213,7 +213,7 @@ function pr_inject_whatsapp_btn_js_fallback() {
                 if(!appArea) appArea = document.querySelector('.single_job_listing');
                 if(appArea) {
                     var waBtn = document.createElement('a');
-                    waBtn.href = "<?php echo esc_js( esc_url_raw( $wa_link ) ); ?>";
+                    waBtn.href = "<?php echo esc_js( esc_url( $wa_link ) ); ?>";
                     waBtn.target = "_blank";
                     waBtn.innerHTML = "📲 Share to WhatsApp";
                     waBtn.style.cssText = "display: block; background: #25D366 !important; color: white !important; padding: 18px !important; text-align: center !important; border-radius: 8px !important; font-weight: bold !important; text-decoration: none !important; font-size: 1.2rem !important; box-shadow: 0 4px 10px rgba(37,211,102,0.3) !important; margin-top: 25px; width: 100%;";
