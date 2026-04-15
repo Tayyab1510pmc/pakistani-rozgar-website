@@ -131,7 +131,7 @@ function pr_v5_render_whatsapp_button() {
 	}
 
 	$printed = true;
-	echo '<div class="pr-whatsapp-wrap">' . $html . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo '<div class="pr-whatsapp-wrap">' . wp_kses_post( $html ) . '</div>';
 }
 
 add_action( 'single_job_listing_start', 'pr_v5_render_whatsapp_button', 20 );
@@ -179,10 +179,20 @@ function pr_v5_whatsapp_fallback_injection() {
 	if ( '' === $button_html ) {
 		return;
 	}
+	$selectors = apply_filters(
+		'pr_v5_whatsapp_fallback_selectors',
+		array(
+			'.application_button',
+			'.job_application',
+			'.single_job_listing .meta',
+		)
+	);
+	$selector_string = implode( ', ', array_filter( array_map( 'sanitize_text_field', (array) $selectors ) ) );
 	?>
 	<script>
 	(function() {
-		var buttonHtml = <?php echo wp_json_encode( $button_html ); ?>;
+		var buttonHtml = <?php echo wp_json_encode( wp_kses_post( $button_html ) ); ?>;
+		var targetSelector = <?php echo wp_json_encode( $selector_string ); ?>;
 		function hasButton() {
 			return document.querySelector('.pr-whatsapp-btn') !== null;
 		}
@@ -190,7 +200,7 @@ function pr_v5_whatsapp_fallback_injection() {
 			if (hasButton()) {
 				return;
 			}
-			var target = document.querySelector('.application_button, .job_application, .single_job_listing .meta');
+			var target = document.querySelector(targetSelector);
 			if (!target) {
 				return;
 			}
