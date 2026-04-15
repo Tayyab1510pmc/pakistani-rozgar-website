@@ -629,7 +629,8 @@ function przgr_render_custom_footer() {
         return;
     }
 
-    $privacy_url = get_privacy_policy_url();
+    $privacy_url  = get_privacy_policy_url();
+    $social_links = przgr_get_social_links();
     ?>
     <footer class="przgr-footer" role="contentinfo">
         <div class="przgr-shell-container">
@@ -637,11 +638,15 @@ function przgr_render_custom_footer() {
                 <div>
                     <h3><?php esc_html_e( 'Pakistani Rozgar', 'pakistani-rozgar' ); ?></h3>
                     <p><?php esc_html_e( 'Pakistan’s modern career platform connecting talented candidates with trusted employers nationwide.', 'pakistani-rozgar' ); ?></p>
-                    <div class="przgr-social">
-                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Facebook', 'pakistani-rozgar' ); ?>">f</a>
-                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'LinkedIn', 'pakistani-rozgar' ); ?>">in</a>
-                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="<?php esc_attr_e( 'Instagram', 'pakistani-rozgar' ); ?>">ig</a>
-                    </div>
+                    <?php if ( ! empty( $social_links ) ) : ?>
+                        <div class="przgr-social">
+                            <?php foreach ( $social_links as $network => $url ) : ?>
+                                <a href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( ucfirst( $network ) ); ?>">
+                                    <?php echo esc_html( przgr_social_abbr( $network ) ); ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div>
                     <h4><?php esc_html_e( 'For Candidates', 'pakistani-rozgar' ); ?></h4>
@@ -678,6 +683,59 @@ function przgr_render_custom_footer() {
         </div>
     </footer>
     <?php
+}
+
+/**
+ * Get footer social links and allow overrides via filter.
+ *
+ * @return array<string, string>
+ */
+function przgr_get_social_links() {
+    $defaults = array(
+        'facebook'  => home_url( '/' ),
+        'linkedin'  => home_url( '/' ),
+        'instagram' => home_url( '/' ),
+    );
+
+    $links = apply_filters( 'przgr_social_links', $defaults );
+
+    if ( ! is_array( $links ) ) {
+        return $defaults;
+    }
+
+    $sanitized = array();
+    foreach ( $links as $network => $url ) {
+        $network = sanitize_key( $network );
+        if ( empty( $network ) ) {
+            continue;
+        }
+        $url = esc_url_raw( $url );
+        if ( empty( $url ) ) {
+            continue;
+        }
+        $sanitized[ $network ] = $url;
+    }
+
+    return ! empty( $sanitized ) ? $sanitized : $defaults;
+}
+
+/**
+ * Social icon abbreviations for compact footer buttons.
+ *
+ * @param string $network Network slug.
+ * @return string
+ */
+function przgr_social_abbr( $network ) {
+    $map = array(
+        'facebook'  => 'f',
+        'linkedin'  => 'in',
+        'instagram' => 'ig',
+        'x'         => 'x',
+        'twitter'   => 'x',
+        'youtube'   => 'yt',
+    );
+
+    return isset( $map[ $network ] ) ? $map[ $network ] : substr( $network, 0, 2 );
 }
 
 /**
