@@ -122,7 +122,11 @@ function pr_get_social_svg($platform) {
         'instagram' => '<svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4A5.8 5.8 0 0 1 16.2 22H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.9A3.9 3.9 0 0 0 3.9 7.8v8.4a3.9 3.9 0 0 0 3.9 3.9h8.4a3.9 3.9 0 0 0 3.9-3.9V7.8a3.9 3.9 0 0 0-3.9-3.9H7.8zm8.95 1.45a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.9a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2z"></path></svg>',
         'linkedin'  => '<svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.95v5.66H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.61 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45z"></path></svg>',
     );
-    return isset($svgs[$platform]) ? $svgs[$platform] : '';
+    $allowed_svg = array(
+        'svg'  => array('viewBox' => true),
+        'path' => array('d' => true),
+    );
+    return isset($svgs[$platform]) ? wp_kses($svgs[$platform], $allowed_svg) : '';
 }
 
 function pr_universal_footer() {
@@ -138,7 +142,7 @@ function pr_universal_footer() {
                         <?php foreach ($social_links as $platform => $url) : ?>
                             <?php if (!empty($url)) : ?>
                                 <a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(ucfirst($platform)); ?>">
-                                    <?php echo pr_get_social_svg($platform); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                    <?php echo pr_get_social_svg($platform); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized in pr_get_social_svg() ?>
                                 </a>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -241,6 +245,7 @@ function pr_homepage_shortcode() {
     <section class="pr-home-hero">
         <h1>Find Your Dream Job</h1>
         <p>Search verified opportunities in Government, IT, Banking, and remote roles across Pakistan.</p>
+        <?php // Keep per_page="0" so only the premium search UI appears in hero without listing results. ?>
         <?php echo do_shortcode('[jobs show_filters="true" show_pagination="false" per_page="0"]'); ?>
         <div class="pr-container">
             <?php echo do_shortcode('[pr_categories]'); ?>
@@ -265,7 +270,7 @@ add_shortcode('pr_contact_page', 'pr_contact_page_shortcode');
 function pr_contact_page_shortcode() {
     $contact_email = sanitize_email(get_option('admin_email'));
     if (empty($contact_email)) {
-        $contact_email = 'support@pakistanirozgar.com';
+        $contact_email = sanitize_email(apply_filters('pr_contact_email_fallback', 'support@pakistanirozgar.com'));
     }
     return '<div class="pr-container" style="padding:80px 20px;max-width:600px;min-height:50vh;"><h1 style="color:#149253;font-size:3rem;text-align:center;font-weight:900;">Contact Us</h1><div style="background:white;padding:40px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.05);margin-top:30px;"><p style="margin-bottom:20px;color:#475569;text-align:center;">Email us at <strong>' . esc_html($contact_email) . '</strong> and we will get back to you within 24 hours.</p></div></div>';
 }
